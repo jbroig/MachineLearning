@@ -36,8 +36,6 @@ def Draw(pred, features, poi, mark_poi=False, name="image.png", f1_name="feature
     plt.savefig(name)
     plt.show()
 
-
-
 ### load in the dict of dicts containing all the data on each person in the dataset
 data_dict = pickle.load( open("../final_project/final_project_dataset.pkl", "r") )
 ### there's an outlier--remove it! 
@@ -48,8 +46,10 @@ data_dict.pop("TOTAL", 0)
 ### can be any key in the person-level dictionary (salary, director_fees, etc.) 
 feature_1 = "salary"
 feature_2 = "exercised_stock_options"
+# feature_3 = "total_payments"
 poi  = "poi"
 features_list = [poi, feature_1, feature_2]
+# features_list = [poi, feature_1, feature_2, feature_3]
 data = featureFormat(data_dict, features_list )
 poi, finance_features = targetFeatureSplit( data )
 
@@ -58,15 +58,71 @@ poi, finance_features = targetFeatureSplit( data )
 ### you'll want to change this line to 
 ### for f1, f2, _ in finance_features:
 ### (as it's currently written, the line below assumes 2 features)
+
+
 for f1, f2 in finance_features:
     plt.scatter( f1, f2 )
 plt.show()
 
+# for f1, f2, f3 in finance_features:
+#     plt.scatter( f1, f2, f3 )
+# plt.show()
+
+#stock_options_range
+import pandas 
+
+df = pandas.DataFrame(data_dict)
+df.loc['exercised_stock_options', :] = pandas.to_numeric(df.loc['exercised_stock_options',:], errors='coerce')
+
+#Max exercised_stock_options
+max_exercised_stock_options = df.loc['exercised_stock_options', :].max(skipna = True)
+print max_exercised_stock_options
+#Min exercised_stock_options
+min_exercised_stock_options = df.loc['exercised_stock_options', :].min(skipna = True)
+print min_exercised_stock_options
+
+#Salary range
+
+df.loc['salary', :] = pandas.to_numeric(df.loc['salary', :], errors='coerce')
+
+#Max salary
+max_salary = df.loc['salary', :].max(skipna= True)
+print max_salary
+#Min Salary
+min_salary = df.loc['salary', :].min(skipna= True)
+print min_salary
+
+
+# the features to be used
+features_list = ['poi', 'salary', 'exercised_stock_options']
+
+from sklearn.preprocessing import MinMaxScaler
+import numpy as np
+
+data = featureFormat(data_dict, features_list)
+
+_, salary, stock = zip(*data)
+
+# put the features into 2-D numpy arrays
+salary = np.array(salary).reshape((len(salary),1))
+stock = np.array(stock).reshape((len(stock),1))
+
+# rescale
+scaler = MinMaxScaler()
+salary = scaler.fit_transform(salary)
+print '$200,000 becomes {0}'.format(scaler.transform([[200000.]])[0][0])
+
+stock = scaler.fit_transform(stock)
+print '$1,000,000 becomes {0}'.format(scaler.transform([[1000000.]])[0][0])
+
+
 ### cluster here; create predictions of the cluster labels
 ### for the data and store them to a list called pred
-
-
-
+pred = []
+from sklearn.cluster import KMeans
+clstr = KMeans(n_clusters=2)
+clstr.fit(finance_features)
+pred = clstr.labels_
 
 ### rename the "name" parameter when you change the number of features
 ### so that the figure gets saved to a different file

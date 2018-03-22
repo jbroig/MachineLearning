@@ -26,15 +26,15 @@ ages_train, ages_test, net_worths_train, net_worths_test = train_test_split(ages
 ### fill in a regression here!  Name the regression object reg so that
 ### the plotting code below works, and you can see what your regression looks like
 
+from sklearn.linear_model import LinearRegression
+reg = LinearRegression()
+reg.fit(ages_train, net_worths_train)
 
+#Slope of regression with outliers
+print reg.coef_
 
-
-
-
-
-
-
-
+#Score of regression with test data
+print reg.score(ages_test, net_worths_test)
 
 try:
     plt.plot(ages, reg.predict(ages), color="blue")
@@ -61,11 +61,20 @@ except NameError:
 
 ### only run this code if cleaned_data is returning data
 if len(cleaned_data) > 0:
-    ages, net_worths, errors = zip(*cleaned_data)
-    ages       = numpy.reshape( numpy.array(ages), (len(ages), 1))
-    net_worths = numpy.reshape( numpy.array(net_worths), (len(net_worths), 1))
-
+    # the non-outlier ages, net worths, and errors
+    ages_train2, net_worths_train2, errors_train2 = zip(*cleaned_data)
+    ages_train2       = numpy.reshape( numpy.array(ages_train2), (len(ages_train2), 1))
+    net_worths_train2 = numpy.reshape( numpy.array(net_worths_train2), (len(net_worths_train2), 1))
     ### refit your cleaned data!
+    
+    reg2 = LinearRegression()
+    reg2.fit(ages_train2, net_worths_train2)
+
+    print 'The slope with cleaned data is: {0}'.format(reg2.coef_)
+
+    #New slope
+    print reg2.score(ages_test, net_worths_test)
+
     try:
         reg.fit(ages, net_worths)
         plt.plot(ages, reg.predict(ages), color="blue")

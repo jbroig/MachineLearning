@@ -29,7 +29,7 @@ target, features = targetFeatureSplit( data )
 from sklearn.cross_validation import train_test_split
 feature_train, feature_test, target_train, target_test = train_test_split(features, target, test_size=0.5, random_state=42)
 train_color = "b"
-test_color = "b"
+test_color = "r"
 
 
 
@@ -38,12 +38,28 @@ test_color = "b"
 ### plots it correctly. Don't forget to change the test_color above from "b" to
 ### "r" to differentiate training points from test points.
 
+from sklearn.linear_model import LinearRegression
 
 
+#Linear Regression
+reg = LinearRegression()
+reg.fit(feature_train, target_train)
 
+#Slope
+slope = reg.coef_
+print slope
 
+#Intercept
+intercept = reg.intercept_
+print intercept
 
+#Score on training data
+training_score = reg.score(feature_train, target_train)
+print training_score
 
+#Score on test data
+test_score = reg.score(feature_test, target_test)
+print 'The score on the test is: {0}'.format(test_score)
 
 ### draw the scatterplot, with color-coded training and testing points
 import matplotlib.pyplot as plt
@@ -64,6 +80,17 @@ try:
     plt.plot( feature_test, reg.predict(feature_test) )
 except NameError:
     pass
+
+
+#Sneak Peek to outliers
+reg.fit(feature_test, target_test)
+plt.plot(feature_train, reg.predict(feature_train), color="b") 
+
+#New slope without outliers
+new_slope = reg.coef_
+print new_slope
+
+
 plt.xlabel(features_list[1])
 plt.ylabel(features_list[0])
 plt.legend()
